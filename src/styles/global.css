@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./normalize.css";
+@import "../../node_modules/svelte-material-ui/themes/svelte-dark.css";
 
 :root {
     --mdc-theme-primary: green;
