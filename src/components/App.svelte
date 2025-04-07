@@ -19,6 +19,8 @@
     edit: (id, data) => store.get(id).edit(data),
     store: () => get(store),
   };
+
+  if($store.length==0)open=true;
 </script>
 
 <Dialog bind:open aria-labelledby="simple-title" aria-describedby="simple-content">
@@ -29,9 +31,9 @@
       actions.add({status: "Stop", seconds: Sec, time: { start: 0, end: 0, pause: 0 }});
       open = !open;
     }}>
-      <InputTime value="0" label="hours" suffix="hrs" />
-      <InputTime value="0" label="minutes" suffix="min" />
-      <InputTime value="0" label="seconds" suffix="sec" />
+      <InputTime value="0" label="Horas" suffix="hrs" />
+      <InputTime value="0" label="Minutos" suffix="min" />
+      <InputTime value="0" label="Segundos" suffix="sec" />
     </Form>
   </Content>
 </Dialog>
