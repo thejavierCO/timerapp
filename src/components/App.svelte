@@ -53,14 +53,13 @@
               let:position
             >
               <FormatCounter time={position} let:Data>
-                  <p class="text-lxx text-center">
+                  <p class="text-xl text-center">
                     {#if Data.Hours != 0}{Data.pad.Hours} :{:else }00 :{/if}
                     {#if Data.Minutes != 0}{Data.pad.Minutes} :{:else }00 :{/if}
                     {#if Data.Seconds != 0}{Data.pad.Seconds} :{:else }00 :{/if}
                     {#if Data.Miliseconds != 0}{Data.pad.Miliseconds}{:else }000{/if}
                   </p>
                 <CircularProgress
-                  class="rounded-full text-red-900"
                   style="height: 200px; width: 200px;"
                   progress={status=="Stop"?1:Data.useRange(data.seconds)}
                 /><br />
