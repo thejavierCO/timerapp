@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@import "./normalize.css";
+
+:root {
+    --mdc-theme-primary: green;
+}

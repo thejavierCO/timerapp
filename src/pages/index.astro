@@ -1,0 +1,22 @@
+---
+	import "../styles/global.css";
+  	import Title from "../components/Main Components/Title.svelte";
+	import App from "../components/App.svelte";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="stylesheet" href="node_modules/svelte-material-ui/themes/svelte-dark.css"
+    		media="screen and (prefers-color-scheme: dark)" />
+	</head>
+	<body>
+		<main>
+			<Title value={`Temporizadores`} />
+			<App client:only="svelte"></App>
+		</main>
+	</body>
+</html>
