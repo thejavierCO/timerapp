@@ -16,23 +16,14 @@
   });
 </script>
 
-<LayoutGrid id="my_form" style="padding:0px;">
-  <Cell span={12}>
-    <form
-      on:submit|preventDefault={(evt) =>
-        emit(
-          "submit",
-          Array.from(evt.currentTarget.querySelectorAll("input")).map((e) => {
-            if (e.type == "number") return Number(e.value ? e.value : e);
-          })
-        )}
+<form
+    on:submit|preventDefault={(evt) =>
+      emit("submit",Array.from(evt.currentTarget.querySelectorAll("input")).map((e) => {
+        if (e.type == "number") return Number(e.value ? e.value : e);
+      }))}
     >
-      <LayoutGrid style="padding:16px;">
-        <slot />
-        <Cell span={12}>
-          <Button><Label>submit</Label></Button>
-        </Cell>
-      </LayoutGrid>
-    </form>
-  </Cell>
-</LayoutGrid>
+    <div class="grid grid-cols-4 gap-4">
+      <slot />
+    </div>
+    <button class="bg-gray-600 p-3 rounded-sm hover:bg-gray-700 w-full m-1">agregar</button>
+</form>
