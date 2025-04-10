@@ -5,12 +5,10 @@
   import CircularProgress from "@smui/circular-progress";
   import Dialog, { Content } from "@smui/dialog";
   import Card from "./Main Components/CardForm.svelte";
-  import Form from "./Form Components/form.svelte";
-  import InputTime from "./Form Components/inputTime.svelte";
   import Timer from "./Timer Components/timer_inde.svelte";
   import FormatCounter from "./Timer Components/FormatCounter.svelte";
+  import {Clock} from "./Timer Components/timer.js"
   let open = false;
-  
   let store = new Store();
   const actions = {
     add: (data) => store.add(data),
@@ -19,24 +17,30 @@
     store: () => get(store),
   };
   if($store.length==0)open=true;
-  
-  store.subscribe((value) => {
-    if(value.length==0)open=true
-  });
+  const clock = new Clock();
 </script>
 
 <Dialog bind:open aria-labelledby="simple-title" aria-describedby="simple-content">
   <Content id="simple-content">
-    <Form on:submit={({ detail: [h, m, s] }) => {
+    <form on:submit|preventDefault={(evt) => {
+      let tags = Array.from(evt.currentTarget.querySelectorAll("input"))
+      .map((e) => (e.type == "number")?Number(e.value ? e.value : e):0)
+      const [h, m, s] = tags;
       const Sec = (!h?0:h) * 60 * 60 + (!m?0:m) * 60 + (!s?0:s);
       if(Sec==0) throw alert("not defined time");
       actions.add({status: "Stop", seconds: Sec, time: { start: 0, end: 0, pause: 0 }});
       open = !open;
-    }}>
-      <InputTime value="0" label="Horas" suffix="hrs" />
-      <InputTime value="0" label="Minutos" suffix="min" />
-      <InputTime value="0" label="Segundos" suffix="sec" />
-    </Form>
+    }}
+      class="grid grid-cols-2 gap-2"
+    >
+      <label for="Hrs" class="text-sm">Horas</label>
+      <input id="Hrs" type="number" min="0" max="59" placeholder="Horas" class="input no-focus border-0 p-2 max-w-sm"/>
+      <label for="Min" class="text-sm">Minutos</label>
+      <input id="Min" type="number" min="0" max="59" placeholder="Minutos" class="input no-focus border-0 p-2 max-w-sm"/>
+      <label for="Sec" class="text-sm">Segundos</label>
+      <input id="Sec" type="number" min="0" max="59" placeholder="Segundos" class="input no-focus border-0 p-2 max-w-sm"/>
+      <input type="submit" value="Agregar" class="border-1 bg-gray-600 p-3 col-span-full"/>
+    </form>
   </Content>
 </Dialog>
 
@@ -45,6 +49,9 @@
       <div in:blur={{ duration: 500 }} out:blur={{ duration: 500 }}>
         <Card id={data.id}>
           <Timer
+            internalClock={(fns)=>{
+              if(typeof fns == "function")clock.subscribe((time)=>fns(time))
+            }}
             seconds={data.seconds}
             status={data.status}
             time={data.time}
@@ -56,6 +63,7 @@
             let:position
           >
             <FormatCounter time={position} let:Data>
+              {JSON.stringify(Data)}
                 <p class="text-xl text-center">
                   {#if Data.Hours != 0}{Data.pad.Hours} :{:else }00 :{/if}
                   {#if Data.Minutes != 0}{Data.pad.Minutes} :{:else }00 :{/if}

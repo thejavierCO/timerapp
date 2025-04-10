@@ -1,9 +1,16 @@
 <script>
-  import { createEventDispatcher, onDestroy, onMount } from "svelte";
+  import { createEventDispatcher, beforeUpdate, onMount } from "svelte";
   export let time = { start: 0, pause: 0, end: 0 };
   export let status = "Stop";
   export let seconds = 1;
   export let autoRun = false;
+  export let internalClock = (fns) => {
+    const updateClock = (_) => {
+      if (fns&&typeof fns == "function") fns(new Date().getTime());
+      window.requestAnimationFrame(updateClock);
+    };
+    updateClock();
+  };
   let emit = createEventDispatcher();
   let position = 0;
   const currentTime = ()=>new Date().getTime();
@@ -44,19 +51,14 @@
     },
   };
   
-  let internalClock = (fns) => {
-    const updateClock = (_) => {
-      if (fns&&typeof fns == "function") fns(new Date().getTime());
-      window.requestAnimationFrame(updateClock);
-    };
-    updateClock();
-  };
   internalClock((t) => {
     if (status == "Play") {
       position = time.end - t;
       emit("Playing");
       if (position <= 0) actions.stop();
-    } 
+    }else if(position!=0&&status=="Stop"){
+      position = 0;
+    }
   });
 
   onMount(() => {

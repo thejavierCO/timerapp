@@ -26,30 +26,6 @@ export class Clock extends EventTarget {
   }
 }
 
-export class timeFormat {
-  constructor(TimeMillis) {
-    this._current_time = TimeMillis;
-  }
-  get current() {
-    return this._current_time
-  }
-  get Hours() {
-    return new String(Math.trunc(this.current / 1000 / 60 / 60) % 60).padStart(2, "0")
-  }
-  get Minutes() {
-    return new String(Math.trunc(this.current / 1000 / 60) % 60).padStart(2, "0")
-  }
-  get Seconds() {
-    return new String(Math.trunc(this.current / 1000) % 60).padStart(2, "0")
-  }
-  get Miliseconds() {
-    return new String(Math.trunc(this.current)).padEnd(4, "0")
-  }
-  useRange(max) {
-    return Number(parseFloat(((this.current * 1) / (max * 1000)).toString()).toFixed(3))
-  }
-}
-
 export default class Timer extends Clock {
   constructor(milliseconds, start = 0, pause = 0, end = 0) {
     super();
@@ -59,9 +35,6 @@ export default class Timer extends Clock {
     this._posicion = 0;
     this._status = "Stop";
     this._milliseconds = milliseconds;
-  }
-  get formatTime() {
-    return new timeFormat(this._posicion);
   }
   get time() {
     return ({ start: this._start, pause: this._pause, end: this._end })
