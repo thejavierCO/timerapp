@@ -63,7 +63,6 @@
             let:position
           >
             <FormatCounter time={position} let:Data>
-              {JSON.stringify(Data)}
                 <p class="text-xl text-center">
                   {#if Data.Hours != 0}{Data.pad.Hours} :{:else }00 :{/if}
                   {#if Data.Minutes != 0}{Data.pad.Minutes} :{:else }00 :{/if}
