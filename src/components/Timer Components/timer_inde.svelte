@@ -1,5 +1,5 @@
 <script>
-  import { createEventDispatcher, beforeUpdate, onMount } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   export let time = { start: 0, pause: 0, end: 0 };
   export let status = "Stop";
   export let seconds = 1;

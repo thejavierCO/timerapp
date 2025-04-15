@@ -27,68 +27,84 @@ export class Clock extends EventTarget {
 }
 
 export default class Timer extends Clock {
-  constructor(milliseconds, start = 0, pause = 0, end = 0) {
+  constructor(milliseconds) {
     super();
-    this._start = start;
-    this._pause = pause;
-    this._end = end;
+    this._time = { start: 0, pause: 0, end: 0 };
     this._posicion = 0;
     this._status = "Stop";
-    this._milliseconds = milliseconds;
+    this._milliseconds = milliseconds | 0;
+  }
+  get CurrentPosicion(){
+    return this._posicion;
   }
   get time() {
-    return ({ start: this._start, pause: this._pause, end: this._end })
+    return this._time;
   }
   set time(time) {
-    let { start, pause, end } = time;
-    this._start = start;
-    this._pause = pause;
-    this._end = end;
+    this._time = time;
+    this.emit("Time", this._time);
   }
   get status() {
     return this._status
   }
-  set status(data) {
-    if (data == "Play") {
-      this.Play()
-    } else if (data == "Pause") {
-      this.Pause()
-    } else if (data == "Stop") {
-      this.Stop()
+  set status(state) {
+    const fnsState = {
+      Play: this.Play,
+      Stop: this.Stop,
+      Pause: this.Pause
     }
-    this._status = data;
+    if(!fnsState.hasOwnProperty(state))throw "not exist state";
+    fnsState[state](this.time);
+    this.emit("Status", this.status);
+    this.emit(state);
   }
-  Play() {
-    const currentTime = new Date().getTime();
-    if (this._pause != 0) {
-      let posPause = Math.round(this._pause - this._start),
-        timePause = this._end - this._start,
+  
+  loop(){
+    this.subscribe((t) => {
+      if (this.status == "Play") {
+        this._posicion = this._end - t;
+        this.emit("Playing");
+        if (this._posicion <= 0) this.status = "Stop";
+      }else if(this._posicion!=0&&this.status=="Stop"){
+        this._posicion = 0;
+      }
+    });
+  }
+  Play(time) {
+    if (this.status=="Play") return this.emit("Error","isPlaying");
+    this._status = "Play";
+    const { start ,pause ,end} = time;
+    const currentTime = this.currentTime;
+    if (pause != 0) {// is pause
+      let posPause = Math.round(pause - start),
+        timePause = end - start,
         timeOff = timePause - posPause;
-      this._start = currentTime;
-      this._end = this._start + timeOff;
-      this._pause = 0;
-    } else if (this._pause == 0 || (this._start == 0 && this._end == 0)) {
-      this._start = currentTime;
-      this._end = this._start + this._milliseconds;
+      this.time = { start: currentTime, pause: 0, end: this._start + timeOff };
+    } else if (pause == 0 || (start == 0 && end == 0)) {
+      this.time = { start: currentTime, pause: 0, end: currentTime + this.milliseconds * 1000 }
     }
-    if (this._start != 0 && this._end != 0) console.warn("currentPlay", this.time);
-    this._position = this._end - this._start;
-    this.emit("Play");
-    this.emit("Status");
+    this._posicion = end - start;
   }
   Stop() {
-    if (this._start == 0 && this._end == 0) console.warn("currentStop");
+    if (this.status=="Stop") return this.emit("Error","isStopped");
+    this._status = "Stop";
     this.time = { start: 0, pause: 0, end: 0 };
-    this._position = 0;
-    this.emit("Stop");
-    this.emit("Status");
+    this._posicion = 0;
   }
-  Pause() {
-    const currentTime = new Date().getTime();
-    if (this._pause == 0) this._pause = currentTime;
-    else console.warn("currentPause");
-    this._position = this._end - this._pause;
-    this.emit("Pause");
-    this.emit("Status");
+  Pause(time) {
+    let { pause ,end} = time;
+    const currentTime = this.currentTime;
+    if (this.status=="Pause") return this.emit("Error","isPaused");
+    this._status = "Pause";
+    if (pause == 0) pause = currentTime;
+    this._posicion = end - pause;
+  }
+  milliseconds(milliseconds) {
+    this._milliseconds = milliseconds;
+    return this;
+  }
+  seconds(seconds) {
+    this._milliseconds = seconds * 1000;
+    return this;
   }
 }

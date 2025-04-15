@@ -5,9 +5,9 @@
   import CircularProgress from "@smui/circular-progress";
   import Dialog, { Content } from "@smui/dialog";
   import Card from "./Main Components/CardForm.svelte";
-  import Timer from "./Timer Components/timer_inde.svelte";
+  import Timer from "./Timer Components/timer.svelte";
   import FormatCounter from "./Timer Components/FormatCounter.svelte";
-  import {Clock} from "./Timer Components/timer.js"
+  // import {Clock} from "./Timer Components/timer.js"
   let open = false;
   let store = new Store();
   const actions = {
@@ -17,7 +17,6 @@
     store: () => get(store),
   };
   if($store.length==0)open=true;
-  const clock = new Clock();
 </script>
 
 <Dialog bind:open aria-labelledby="simple-title" aria-describedby="simple-content">
@@ -49,9 +48,6 @@
       <div in:blur={{ duration: 500 }} out:blur={{ duration: 500 }}>
         <Card id={data.id}>
           <Timer
-            internalClock={(fns)=>{
-              if(typeof fns == "function")clock.subscribe((time)=>fns(time))
-            }}
             seconds={data.seconds}
             status={data.status}
             time={data.time}
