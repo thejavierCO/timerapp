@@ -40,12 +40,12 @@ export default class Timer extends Clock {
   get time() {
     return this._time;
   }
+  get status() {
+    return this._status
+  }
   set time(time) {
     this._time = time;
     this.emit("Time", this._time);
-  }
-  get status() {
-    return this._status
   }
   set status(state) {
     const fnsState = {
@@ -54,57 +54,61 @@ export default class Timer extends Clock {
       Pause: this.Pause
     }
     if(!fnsState.hasOwnProperty(state))throw "not exist state";
-    fnsState[state](this.time);
+    fnsState[state]();
     this.emit("Status", this.status);
     this.emit(state);
   }
   
-  loop(){
+  get milliseconds(){
+    return this._milliseconds
+  }
+
+  seconds = (seconds)=>{
+    this._milliseconds = seconds * 1000;
+    return this;
+  }
+
+  loop = ()=>{
     this.subscribe((t) => {
       if (this.status == "Play") {
-        this._posicion = this._end - t;
-        this.emit("Playing");
+        this._posicion = this.time.end - t;
+        this.emit("Playing", this._posicion);
         if (this._posicion <= 0) this.status = "Stop";
       }else if(this._posicion!=0&&this.status=="Stop"){
         this._posicion = 0;
       }
     });
   }
-  Play(time) {
+  Play = ()=>{
     if (this.status=="Play") return this.emit("Error","isPlaying");
     this._status = "Play";
-    const { start ,pause ,end} = time;
+    let { start ,pause ,end} = this.time;
     const currentTime = this.currentTime;
     if (pause != 0) {// is pause
       let posPause = Math.round(pause - start),
         timePause = end - start,
         timeOff = timePause - posPause;
-      this.time = { start: currentTime, pause: 0, end: this._start + timeOff };
+      start = currentTime;
+      end = start + timeOff 
+      this.time = { start, pause: 0, end};
     } else if (pause == 0 || (start == 0 && end == 0)) {
-      this.time = { start: currentTime, pause: 0, end: currentTime + this.milliseconds * 1000 }
+      start = currentTime;
+      this.time = { start, pause: 0, end: start + this.milliseconds }
     }
     this._posicion = end - start;
   }
-  Stop() {
+  Stop = ()=>{
     if (this.status=="Stop") return this.emit("Error","isStopped");
     this._status = "Stop";
     this.time = { start: 0, pause: 0, end: 0 };
     this._posicion = 0;
   }
-  Pause(time) {
-    let { pause ,end} = time;
+  Pause = ()=>{
+    let { start ,pause ,end} = this.time;
     const currentTime = this.currentTime;
     if (this.status=="Pause") return this.emit("Error","isPaused");
     this._status = "Pause";
-    if (pause == 0) pause = currentTime;
+    if (pause == 0) this.time = { start, pause: currentTime, end }
     this._posicion = end - pause;
-  }
-  milliseconds(milliseconds) {
-    this._milliseconds = milliseconds;
-    return this;
-  }
-  seconds(seconds) {
-    this._milliseconds = seconds * 1000;
-    return this;
   }
 }

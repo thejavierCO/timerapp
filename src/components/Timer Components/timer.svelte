@@ -11,11 +11,19 @@
   export let btnPlay = () => App.status = "Play";
   export let btnStop = () => App.status = "Stop";
   export let btnPause = () => App.status = "Pause";
+  let position = 0;
   App.on("Status",({detail})=>{
-    console.log(detail)
+    status = detail;
+    if(status=="Stop")position = 0;
+  })
+  App.on("Time",({detail})=>{
+    time = detail;
+  })
+  App.on("Playing",({detail})=>{
+    position = detail;
   })
   onMount(()=>{
-    // App.loop();
+    App.loop();
     if(autoRun)btnPlay()
   })
 </script>
@@ -25,5 +33,5 @@
 {btnPause}
 {btnStop}
 {status}
-position={App.CurrentPosicion}
+{position}
 />
