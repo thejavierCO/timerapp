@@ -10,7 +10,14 @@ export class Clock extends EventTarget {
     updateClock();
   }
   subscribe(fns) {
-    return this.on("clock", ({ detail }) => fns(detail));
+    let unsus = this.on("clock", ({ detail }) => {
+      try{
+        fns(detail);
+      }catch(e){
+        unsus();
+        throw e;
+      }
+    });
   }
   get currentTime() {
     return this._currentTime
@@ -27,25 +34,33 @@ export class Clock extends EventTarget {
 }
 
 export default class Timer extends Clock {
-  constructor(milliseconds) {
+  constructor({ milliseconds,seconds,time ,status }) {
     super();
-    this._time = { start: 0, pause: 0, end: 0 };
-    this._posicion = 0;
-    this._status = "Stop";
-    this._milliseconds = milliseconds | 0;
+    this.time = time || { start: 0, pause: 0, end: 0 };
+    this.posicion = 0;
+    this.status = status || "Stop";
+    if(seconds) this.seconds = seconds;
+    else this.milliseconds = milliseconds || 0;
   }
-  get CurrentPosicion(){
+  get posicion(){
     return this._posicion;
+  }
+  set posicion(update){
+    if(typeof update !== "number")throw "Not number";
+    if(Number.isNaN(update))throw "Not a number";
+    this._posicion = update;
+    this.emit("Posicion",this.Posicion)
   }
   get time() {
     return this._time;
   }
-  get status() {
-    return this._status
-  }
   set time(time) {
+    if(typeof time !== "object")throw "Not object"
     this._time = time;
     this.emit("Time", this._time);
+  }
+  get status() {
+    return this._status
   }
   set status(state) {
     const fnsState = {
@@ -53,29 +68,40 @@ export default class Timer extends Clock {
       Stop: this.Stop,
       Pause: this.Pause
     }
-    if(!fnsState.hasOwnProperty(state))throw "not exist state";
+    if(!fnsState.hasOwnProperty(state))throw "not exist state "+state;
     fnsState[state]();
     this.emit("Status", this.status);
     this.emit(state);
   }
   
   get milliseconds(){
-    return this._milliseconds
+    return this._milliseconds;
+  }
+  set milliseconds(millis){
+    return this._milliseconds = millis;
+  }
+  get seconds(){
+    return this._milliseconds/1000;
+  }
+  set seconds(seconds){
+    if(seconds) this._milliseconds = seconds * 1000;
   }
 
-  seconds = (seconds)=>{
-    this._milliseconds = seconds * 1000;
-    return this;
-  }
-
-  loop = ()=>{
-    this.subscribe((t) => {
-      if (this.status == "Play") {
-        this._posicion = this.time.end - t;
-        this.emit("Playing", this._posicion);
-        if (this._posicion <= 0) this.status = "Stop";
-      }else if(this._posicion!=0&&this.status=="Stop"){
-        this._posicion = 0;
+  loop = (fns)=>{
+    let call = (data)=>fns&&typeof fns == "function"?fns(data):this.emit("Playing", data);
+    return this.subscribe((t) => {
+      if(this.status=="Play"){
+        const {end} = this.time;
+        if(!Number.isNaN(end)){
+          this.posicion = end - t;
+          if(this.posicion <= 0) this.status = "Stop";
+          call(this.posicion);
+        }else{
+          console.log(end,this.milliseconds)
+        }
+      }else if(this.posicion!=0&&this.status=="Stop"){
+        this.posicion = 0;
+        call(this.posicion)
       }
     });
   }
@@ -83,8 +109,9 @@ export default class Timer extends Clock {
     if (this.status=="Play") return this.emit("Error","isPlaying");
     this._status = "Play";
     let { start ,pause ,end} = this.time;
+    const millis = this.milliseconds || 0;
     const currentTime = this.currentTime;
-    if (pause != 0) {// is pause
+    if (pause != 0) {
       let posPause = Math.round(pause - start),
         timePause = end - start,
         timeOff = timePause - posPause;
@@ -93,15 +120,15 @@ export default class Timer extends Clock {
       this.time = { start, pause: 0, end};
     } else if (pause == 0 || (start == 0 && end == 0)) {
       start = currentTime;
-      this.time = { start, pause: 0, end: start + this.milliseconds }
+      this.time = { start, pause: 0, end: start + millis }
     }
-    this._posicion = end - start;
+    this.posicion = end - start;
   }
   Stop = ()=>{
     if (this.status=="Stop") return this.emit("Error","isStopped");
     this._status = "Stop";
     this.time = { start: 0, pause: 0, end: 0 };
-    this._posicion = 0;
+    this.posicion = 0;
   }
   Pause = ()=>{
     let { start ,pause ,end} = this.time;
@@ -109,6 +136,6 @@ export default class Timer extends Clock {
     if (this.status=="Pause") return this.emit("Error","isPaused");
     this._status = "Pause";
     if (pause == 0) this.time = { start, pause: currentTime, end }
-    this._posicion = end - pause;
+    this.posicion = end - pause;
   }
 }

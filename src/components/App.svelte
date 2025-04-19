@@ -48,10 +48,11 @@
       <div in:blur={{ duration: 500 }} out:blur={{ duration: 500 }}>
         <Card id={data.id}>
           <Timer
+            id={data.id}
             seconds={data.seconds}
             status={data.status}
             time={data.time}
-            on:Status={({ detail: statusData }) => actions.edit(data.id, statusData)}
+            Status={(statusData) => actions.edit(data.id,statusData)}
             let:btnPlay
             let:btnStop
             let:btnPause

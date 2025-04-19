@@ -1,37 +1,40 @@
 <script>
   import Timer from "./timer.js"
-  import {onMount } from "svelte";
-  export let time = { start: 0, pause: 0, end: 0 };
-  export let status = "Stop";
-  export let seconds = 1;
-  export let autoRun = false;
-  let App = new Timer().seconds(seconds);
-  App.status = status;
-  App.time = time;
-  export let btnPlay = () => App.status = "Play";
-  export let btnStop = () => App.status = "Stop";
-  export let btnPause = () => App.status = "Pause";
-  let position = 0;
-  App.on("Status",({detail})=>{
-    status = detail;
-    if(status=="Stop")position = 0;
+  let { 
+    time = { start: 0, end: 0, pause: 0 },
+    status = "Stop", 
+    seconds = 0, 
+    autoRun,
+    Status,
+    id
+  } = $props();
+  let App = new Timer({time,status,seconds});
+  let position = $state(0);
+  let btnPlay = () => App.status = "Play";
+  let btnPause = () => App.status = "Pause";
+  let btnStop = () => App.status = "Stop";
+  
+  App.on("Status",({detail})=>status=detail)
+  App.on("Time",({detail})=>time=detail)
+
+  $effect(()=>{
+    App.loop((t)=>position=t)
+    if(autoRun)btnPlay();
+    return ()=>App.Stop();
   })
-  App.on("Time",({detail})=>{
-    time = detail;
-  })
-  App.on("Playing",({detail})=>{
-    position = detail;
-  })
-  onMount(()=>{
-    App.loop();
-    if(autoRun)btnPlay()
-  })
+  $inspect(status,time)
+  .with((t,status,time)=>t=="update"?Status({status,time}):"init");
+  $inspect(seconds)
+  .with((t,seconds)=>App.seconds=seconds);
 </script>
 
+<!-- svelte-ignore slot_element_deprecated -->
 <slot
 {btnPlay}
 {btnPause}
 {btnStop}
 {status}
 {position}
-/>
+>
+<h1>test</h1>
+</slot>
