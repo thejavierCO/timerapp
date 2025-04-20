@@ -5,25 +5,34 @@
     status = "Stop", 
     seconds = 0, 
     autoRun,
-    Status,
-    id
+    Status
   } = $props();
   let App = new Timer({time,status,seconds});
   let position = $state(0);
-  let btnPlay = () => App.status = "Play";
-  let btnPause = () => App.status = "Pause";
-  let btnStop = () => App.status = "Stop";
-  
-  App.on("Status",({detail})=>status=detail)
-  App.on("Time",({detail})=>time=detail)
-
+  let btnPlay = () => App.Play(()=>{
+    status = App.status
+    time = App.time
+  });
+  let btnPause = () => App.Pause(()=>{
+    status = App.status
+    time = App.time
+  });
+  let btnStop = () => App.Stop(()=>{
+    status = App.status
+    time = App.time
+  });
+  App.on("debug",({detail})=>console.log(detail))
   $effect(()=>{
-    App.loop((t)=>position=t)
+    App.loop((t)=>{
+      position = t;
+      status = App.status;
+      time = App.time;
+    });
     if(autoRun)btnPlay();
-    return ()=>App.Stop();
+    return ()=>btnStop();
   })
   $inspect(status,time)
-  .with((t,status,time)=>t=="update"?Status({status,time}):"init");
+  .with((t,status,time)=>Status({status,time}));
   $inspect(seconds)
   .with((t,seconds)=>App.seconds=seconds);
 </script>
