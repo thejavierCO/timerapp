@@ -1,13 +1,14 @@
 <script>
+  import {onMount} from "svelte"
   import ClockAdd from "./icons/btnClockAdd.svelte";
   import Store from "./Db Components/storeAndLocalStorage.js";
   import { blur } from "svelte/transition";
   import CircularProgress from "@smui/circular-progress";
   import Dialog, { Content } from "@smui/dialog";
   import Card from "./Main Components/CardForm.svelte";
-  import Timer from "./Timer Components/timer.svelte";
+  import Timer from "./Timer Components/timer_inde.svelte";
   import FormatCounter from "./Timer Components/FormatCounter.svelte";
-  // import {Clock} from "./Timer Components/timer.js"
+  import {Clock} from "./Timer Components/timer.js"
   let open = false;
   let store = new Store();
   const actions = {
@@ -17,6 +18,8 @@
     store: () => get(store),
   };
   if($store.length==0)open=true;
+  let clock = new Clock();
+  onMount(()=>clock.init());
 </script>
 
 <Dialog bind:open aria-labelledby="simple-title" aria-describedby="simple-content">
@@ -48,11 +51,12 @@
       <div in:blur={{ duration: 500 }} out:blur={{ duration: 500 }}>
         <Card id={data.id}>
           <Timer
+            internalClock={(fns)=>clock.subscribe((t)=>fns(t))}
             id={data.id}
             seconds={data.seconds}
             status={data.status}
             time={data.time}
-            Status={(statusData) => actions.edit(data.id,statusData)}
+            on:Status={({detail:statusData}) => actions.edit(data.id,statusData)}
             let:btnPlay
             let:btnStop
             let:btnPause

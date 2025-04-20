@@ -62,6 +62,7 @@
   });
 
   onMount(() => {
+    if(status=="Pause")position = time.end - time.pause;
     if (autoRun) actions.play();
   });
 </script>
