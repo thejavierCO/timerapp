@@ -1,4 +1,21 @@
-export class Clock extends EventTarget {
+export class updateEventTarget extends EventTarget{
+  on(event, callback) {
+    this.addEventListener(event, callback);
+    return () => {
+      this.removeEventListener(event, callback);
+    }
+  }
+  emit(event, data) {
+    let emit = (evt,data)=>data?
+    this.dispatchEvent(new CustomEvent(evt, { detail: data })):
+    this.dispatchEvent(new Event(evt));
+    data?emit(event,data):emit(event);
+    data?emit("debug",{event,data}):emit("debug",{event});
+    data?emit("debug:"+event,data):emit("debug:"+event);
+  }
+}
+
+export class Clock extends updateEventTarget {
   constructor() {
     super();
     this._status = false;
@@ -10,30 +27,17 @@ export class Clock extends EventTarget {
   init = () => {
     this.emit("clock", this.currentTime)
     this.idCancel = window.requestAnimationFrame(this.init);
+    return this;
   };
   Cancel = () => {
     window.cancelAnimationFrame(this.idCancel);
     this.idCancel = 0;
+    return this;
   };
   subscribe(fns) {
     let unsus = this.on("clock", ({ detail }) => {
-      try{
-        fns(detail);
-      }catch(e){
-        unsus();
-        throw e;
-      }
+      try{fns(detail)}catch(e){unsus();throw e;}
     });
-  }
-  on(event, callback) {
-    this.addEventListener(event, callback);
-    return () => {
-      this.removeEventListener(event, callback);
-    }
-  }
-  emit(event, data) {
-    if(data)return this.dispatchEvent(new CustomEvent(event, { detail: data }));
-    else return this.dispatchEvent(new Event(event));
   }
 }
 
@@ -159,19 +163,5 @@ export default class Timer extends Clock {
     this.emit("Pause")
     if(fns&&typeof fns === "function")fns();
     this.Cancel();
-  }
-  emit = (type,data)=>{
-    if(type == "clock")super.emit("clock",this.currentTime);
-    else{
-      if(data){
-        super.emit(type,data);
-        super.emit("debug",{type,data})
-        super.emit("debug:"+type,data)
-      }else{
-        super.emit(type);
-        super.emit("debug",{type})
-        super.emit("debug:"+type)
-      }
-    }
   }
 }

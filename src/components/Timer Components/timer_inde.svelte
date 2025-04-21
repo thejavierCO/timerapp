@@ -1,5 +1,5 @@
 <script>
-  import { createEventDispatcher, onMount } from "svelte";
+  import { createEventDispatcher, onMount ,beforeUpdate} from "svelte";
   export let time = { start: 0, pause: 0, end: 0 };
   export let status = "Stop";
   export let seconds = 1;
@@ -65,6 +65,9 @@
     if(status=="Pause")position = time.end - time.pause;
     if (autoRun) actions.play();
   });
+  beforeUpdate(()=>{
+    if(status=="Pause")position = time.end - time.pause;
+  })
 </script>
 
 <slot

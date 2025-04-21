@@ -1,5 +1,5 @@
 <script>
-  import {onMount} from "svelte"
+  import {onMount,onDestroy} from "svelte"
   import ClockAdd from "./icons/btnClockAdd.svelte";
   import Store from "./Db Components/storeAndLocalStorage.js";
   import { blur } from "svelte/transition";
@@ -20,6 +20,7 @@
   if($store.length==0)open=true;
   let clock = new Clock();
   onMount(()=>clock.init());
+  onDestroy(()=>clock.Cancel());
 </script>
 
 <Dialog bind:open aria-labelledby="simple-title" aria-describedby="simple-content">
