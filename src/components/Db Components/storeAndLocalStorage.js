@@ -18,5 +18,6 @@ export default class StoreUseLocalStorage extends Store {
       const store = this.Keys.get("store");
       store.data = store.toString(data);
     })
+    this.subscribe(e=>{if(e.length==0)this.emit("void")})
   }
 }

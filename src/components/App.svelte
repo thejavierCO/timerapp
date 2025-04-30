@@ -21,6 +21,7 @@
   let clock = new Clock();
   onMount(()=>clock.init());
   onDestroy(()=>clock.Cancel());
+  store.on("void",()=>open=true);
 </script>
 
 <Dialog bind:open aria-labelledby="simple-title" aria-describedby="simple-content">

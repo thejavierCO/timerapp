@@ -1,3 +1,4 @@
+import { updateEventTarget } from "./localStorage"
 import { writable, get as getStoreData } from "svelte/store";
 import { v4 as uuidv4 } from "uuid";
 
@@ -26,7 +27,7 @@ class StoreItem {
   }
 }
 
-export default class Store extends EventTarget {
+export default class Store extends updateEventTarget {
   Destroy() {
     throw new Error("Method not implemented.");
   }
@@ -49,7 +50,7 @@ export default class Store extends EventTarget {
   add(data) {
     if (!data.id) data.id = uuidv4();
     this.update((e) => [...e, data])
-    this.emit("add");
+    this.emit("add",data.id);
     return this;
   }
   get(id) {
@@ -64,13 +65,5 @@ export default class Store extends EventTarget {
   import(data) {
     this.data = data;
     this.emit("import");
-  }
-  emit(name, data) {
-    if (data) return this.dispatchEvent(new CustomEvent(name, { detail: data, cancelable: true }))
-    else return this.dispatchEvent(new Event(name, { cancelable: true }))
-  }
-  on(name, callback) {
-    this.addEventListener(name, callback);
-    return this;
   }
 }
