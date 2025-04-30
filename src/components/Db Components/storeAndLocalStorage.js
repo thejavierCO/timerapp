@@ -5,12 +5,13 @@ export default class StoreUseLocalStorage extends Store {
   constructor(fnsUnsuscribe) {
     super((setInternalStore) => {
       this.Keys = new localStorageDb();
+      const {on:onClear} = this.Keys.Storage("Clear")
       const store = this.Keys.add("store").defaultData("[]")
       setInternalStore(store.toJSON());
-      store.onChange(({ newValue: data }) => {
+      store.StorageUpdate(({ newValue: data }) => {
         if (!document.hasFocus()) setInternalStore(store.toJSON(data))
       })
-      this.Keys.on("ClearStorage", (_) => setInternalStore([]))
+      onClear(()=>setInternalStore([]));
       return fnsUnsuscribe;
     });
     this.Destroy = this.subscribe((data) => {
